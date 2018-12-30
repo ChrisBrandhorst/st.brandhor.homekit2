@@ -6,6 +6,9 @@ const fs = require('fs');
 // Enable TCP debug
 // process.env.DEBUG = 'TCP';
 
+// Enable inspector
+if (debug) require('inspector').open(9229, '0.0.0.0', true);
+
 const Homey = require('homey')
 const { HomeyAPI } = require('athom-api')
 const Homekit = require('./lib/homekit.js')
