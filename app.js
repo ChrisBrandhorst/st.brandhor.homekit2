@@ -2,6 +2,7 @@
 
 const debug = true;
 const fs = require('fs');
+const delay          = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // Enable TCP debug
 // process.env.DEBUG = 'TCP';
@@ -55,62 +56,6 @@ class HomekitApp extends Homey.App
     return log;
   }
 
-  async initOldStruct()
-  {
-    let allPairedDevices = await Homey.ManagerSettings.get('pairedDevices') || [];
-    let allPairedDevicesUngrouped = await Homey.ManagerSettings.get('pairedDevicesUngrouped') || [];
-
-    if (allPairedDevices.length > 0)
-    {
-      for (let i = 0; i < allPairedDevices.length; i++)
-      {
-        let device = allPairedDevices[i];
-
-        newPairedDevices[device.id] = {};
-        newPairedDevices[device.id].group = true;
-        newPairedDevices[device.id].accessory = false;
-        newPairedDevices[device.id].pairedСlass = device.class;
-        newPairedDevices[device.id].pairedCapabilities = {};
-        newPairedDevices[device.id].homeKitIDs = {};
-
-        for (let capabilitie in device.capabilities)
-        {
-          newPairedDevices[device.id].pairedCapabilities[capabilitie] = device.capabilities[capabilitie].id;
-        }
-      }
-
-      Homey.ManagerSettings.set('pairedDevices', [], (err, result) =>
-      {
-        if (err) return Homey.alert(err);
-      });
-    }
-
-    if (allPairedDevicesUngrouped.length > 0)
-    {
-      for (let i = 0; i < allPairedDevicesUngrouped.length; i++)
-      {
-        let device = allPairedDevicesUngrouped[i];
-
-        newPairedDevices[device.id] = {};
-        newPairedDevices[device.id].group = false;
-        newPairedDevices[device.id].accessory = false;
-        newPairedDevices[device.id].pairedСlass = device.class;
-        newPairedDevices[device.id].pairedCapabilities = {};
-        newPairedDevices[device.id].homeKitIDs = {};
-
-        for (let capabilitie in device.capabilities)
-        {
-          newPairedDevices[device.id].pairedCapabilities[capabilitie] = device.capabilities[capabilitie].id;
-        }
-      }
-
-      Homey.ManagerSettings.set('pairedDevicesUngrouped', [], (err, result) =>
-      {
-        if (err) return Homey.alert(err);
-      });
-    }
-  }
-
   // Start server function
   async startingServer()
   {
@@ -124,7 +69,6 @@ class HomekitApp extends Homey.App
     server = await Homekit.configServer(systeminfo);
 
     newPairedDevices = await Homey.ManagerSettings.get('newPairedDevices') || {};
-    await this.initOldStruct();
 
     let deviceForDel = [];
     let allDevices = await this.getDevices();
@@ -147,9 +91,9 @@ class HomekitApp extends Homey.App
         {
           for (let capabilitie in pairedDevice.pairedCapabilities)
           {
-            if (capabilitie in checkDevice.capabilities)
+            if (capabilitie in checkDevice.capabilitiesObj)
             {
-              if (checkDevice.capabilities[capabilitie].id != pairedDevice.pairedCapabilities[capabilitie])
+              if (checkDevice.capabilitiesObj[capabilitie].id != pairedDevice.pairedCapabilities[capabilitie])
               {
                 console.log(device + ' - capabilitie ID change.', 'info');
                 deviceForDel.push(device);
@@ -165,7 +109,7 @@ class HomekitApp extends Homey.App
             }
           }
 
-          for (let capabilitie in checkDevice.capabilities)
+          for (let capabilitie in checkDevice.capabilitiesObj)
           {
             if (capabilitie in pairedDevice.pairedCapabilities == false)
             {
@@ -222,6 +166,30 @@ class HomekitApp extends Homey.App
 
   async onInit()
   {
+
+    this.api = await this.getApi();
+    this.pairedDevices = {};
+
+    let uptime     = (await this.api.system.getInfo()).uptime;
+
+    if (uptime < 600) {
+
+      console.log('Homey rebooted, waiting for devices to settle');
+
+      let previousDeviceCount = 0;
+
+      while (true) {
+
+        let newDeviceCount = Object.keys(await this.getDevices()).length;
+
+        if (newDeviceCount && newDeviceCount === previousDeviceCount) break;
+
+        previousDeviceCount = newDeviceCount;
+
+        await delay(60 * 1000);
+      }
+    }
+
     // Start the server
     await this.startingServer()
       .then(console.log('Homekit server starting!', 'info'))
@@ -254,9 +222,9 @@ class HomekitApp extends Homey.App
         newPairedDevices[device].pairedCapabilities = {};
         newPairedDevices[device].homeKitIDs = {};
 
-        for (let capabilitie in allDevices[device].capabilities)
+        for (let capabilitie in allDevices[device].capabilitiesObj)
         {
-          newPairedDevices[device].pairedCapabilities[capabilitie] = allDevices[device].capabilities[capabilitie].id;
+          newPairedDevices[device].pairedCapabilities[capabilitie] = allDevices[device].capabilitiesObj[capabilitie].id;
         }
 
         await Homekit.createDevice(allDevices[device], server, group, newPairedDevices);

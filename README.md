@@ -53,6 +53,30 @@ And I [Sprut](https://github.com/sprut666666) - engaged in ongoing app developme
 
 ### Changelog
 
+#### 3.0.7
+- Hot fix
+
+#### 3.0.6
+- multi-capabilities support in 2.0
+
+#### 3.0.5
+- Hot-hot fix
+
+#### 3.0.4
+- Hot fix
+
+#### 3.0.3
+- Fix capabilities
+
+#### 3.0.2
+- Fix thermostat
+
+#### 3.0.1
+- Fix icon & delete Device
+
+#### 3.0.0
+- Homey 2.0 works
+
 #### 2.6.2
 - critical fix PM25Density Sensor
 
