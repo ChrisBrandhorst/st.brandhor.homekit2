@@ -1,5 +1,5 @@
 {
-  "id": "st.brandhor.homekit",
+  "id": "com.sprut.homekit",
   "sdk": 2,
   "permissions": [
     "homey:manager:api"
@@ -17,28 +17,24 @@
     "nl": ["homekit", "siri", "iOS"]
   },
   "category": "appliances",
-  "version": "2.6.3",
+  "version": "2.6.2",
   "compatibility": ">=1.5.0",
   "author": {
-    "name": "Chris Brandhorst",
-    "email": "chris@brandhor.st"
+    "name": "Sprut",
+    "email": "sprut.1@me.com"
   },
-  "contributors": {
-    "developers": [
+	"contributors": {
+		"developers": [
       {
-        "name": "Chris Brandhorst",
-        "email": "chris@brandhor.st"
-      },
-      {
-        "name": "Sprut",
-        "email": "sprut.1@me.com"
-      },
-      {
-        "name": "Abedinpour",
-        "email": "abedinpourmh@gmail.com"
-      }
-    ]
-  },
+				"name": "Sprut",
+				"email": "sprut.1@me.com"
+			},
+			{
+				"name": "Abedinpour",
+				"email": "abedinpourmh@gmail.com"
+			}
+		]
+	},
   "images": {
     "large": "./assets/images/large.png",
     "small": "./assets/images/small.png"
